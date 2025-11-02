@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoinMarketCap Link Scraper</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #ffffff;
+        color: #1a1a1a;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 720px;
+        padding: 32px;
+        box-sizing: border-box;
+      }
+
+      h1 {
+        margin-bottom: 12px;
+        font-size: 28px;
+      }
+
+      p {
+        margin-top: 0;
+        margin-bottom: 24px;
+        color: #555555;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      input[type='text'] {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid #d0d0d0;
+        font-size: 16px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease;
+      }
+
+      input[type='text']:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      button {
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: none;
+        background: #3b82f6;
+        color: #ffffff;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      button.secondary {
+        background: #f97316;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      button.secondary:hover {
+        background: #ea580c;
+      }
+
+      pre {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        max-height: 400px;
+        overflow: auto;
+        font-size: 14px;
+      }
+
+      .error {
+        color: #dc2626;
+        margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CoinMarketCap Link Scraper</h1>
+      <p>Pflicht: Website + Whitepaper müssen vorhanden sein.</p>
+      <label for="urlInput">CoinMarketCap-Projekt-URL</label>
+      <input
+        id="urlInput"
+        type="text"
+        placeholder="https://coinmarketcap.com/currencies/ethereum/"
+      />
+      <div id="error" class="error"></div>
+      <div class="actions">
+        <button id="scrapeButton">Suchen</button>
+        <button class="secondary" id="exampleButton">Beispiel: Ethereum</button>
+      </div>
+      <pre id="result">{\n  "status": "Bereit"\n}</pre>
+    </div>
+
+    <script>
+      const input = document.getElementById('urlInput');
+      const result = document.getElementById('result');
+      const errorBox = document.getElementById('error');
+      const scrapeButton = document.getElementById('scrapeButton');
+      const exampleButton = document.getElementById('exampleButton');
+
+      async function fetchLinks() {
+        const url = input.value.trim();
+
+        if (!url) {
+          errorBox.textContent = 'Bitte eine gültige CoinMarketCap-URL eingeben.';
+          return;
+        }
+
+        errorBox.textContent = '';
+        result.textContent = 'Lade ...';
+
+        try {
+          const response = await fetch(`/scrape?url=${encodeURIComponent(url)}`);
+          const data = await response.json();
+
+          if (!response.ok) {
+            errorBox.textContent = data.error || 'Unbekannter Fehler.';
+          } else {
+            errorBox.textContent = '';
+          }
+
+          result.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          errorBox.textContent = 'Netzwerkfehler beim Abrufen der Daten.';
+          result.textContent = JSON.stringify({ error: error.message }, null, 2);
+        }
+      }
+
+      scrapeButton.addEventListener('click', () => {
+        fetchLinks();
+      });
+
+      exampleButton.addEventListener('click', () => {
+        input.value = 'https://coinmarketcap.com/currencies/ethereum/';
+        fetchLinks();
+      });
+
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          fetchLinks();
+        }
+      });
+    </script>
+  </body>
+</html>
