@@ -118,7 +118,7 @@
         <button id="scrapeButton">Suchen</button>
         <button class="secondary" id="exampleButton">Beispiel: Ethereum</button>
       </div>
-      <pre id="result">{\n  "status": "Bereit"\n}</pre>
+      <pre id="result">{\n  "website": null,\n  "whitepaperUrl": null,\n  "whitepaperText": null,\n  "coingecko": null,\n  "dextools": null\n}</pre>
     </div>
 
     <script>
@@ -149,10 +149,27 @@
             errorBox.textContent = '';
           }
 
-          result.textContent = JSON.stringify(data, null, 2);
+          const fields = ['website', 'whitepaperUrl', 'whitepaperText', 'coingecko', 'dextools'];
+          const output = {};
+
+          for (const field of fields) {
+            output[field] = data?.result?.[field] ?? null;
+          }
+
+          result.textContent = JSON.stringify(output, null, 2);
         } catch (error) {
           errorBox.textContent = 'Netzwerkfehler beim Abrufen der Daten.';
-          result.textContent = JSON.stringify({ error: error.message }, null, 2);
+          result.textContent = JSON.stringify(
+            {
+              website: null,
+              whitepaperUrl: null,
+              whitepaperText: null,
+              coingecko: null,
+              dextools: null
+            },
+            null,
+            2
+          );
         }
       }
 
